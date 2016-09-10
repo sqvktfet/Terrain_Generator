@@ -149,4 +149,16 @@ public class TerrainScript : MonoBehaviour {
 		result = (float)rnd.NextDouble() * rangeOfNoise - rangeOfNoise / 2;
 		return result;
 	}
+
+	public int GetSize() {
+		return size;
+	}
+
+	public int GetScale() {
+		return scale;
+	}
+
+	public float GetHeight(int x, int z) {
+		return heightMap [x, z];
+	}
 }
