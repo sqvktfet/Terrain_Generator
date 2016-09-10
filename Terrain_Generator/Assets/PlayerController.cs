@@ -13,6 +13,8 @@ public class PlayerController : MonoBehaviour {
 	private Vector2 mouseLook; // how much total movement the mouse has made
 	private Vector2 smoothV;
 
+
+	public Transform terrain;
 	private TerrainScript terrainScript;
 
 //	public Text playerPositionText;
@@ -22,12 +24,10 @@ public class PlayerController : MonoBehaviour {
 	private int scale;
 	private float tall;
 
-//	private Vector3 maxMapBound;
-//	private Vector3 minMapBound;
-//	private float maxPositionX = 0;
-//	private float minPositionX = 0;
-//	private	float maxPositionZ = 100;
-//	private float minPositionZ = 100;
+	private Vector3 maxMapBound;
+	private Vector3 minMapBound;
+	private int maxPosition;
+	private int minPosition;
 
 
 	GameObject gameCamera;	// controlling the camera for rotating purpose
@@ -38,16 +38,25 @@ public class PlayerController : MonoBehaviour {
 		Cursor.lockState = CursorLockMode.Locked;
 		gameCamera = this.transform.GetChild(0).gameObject;	// which is the camera object
 
-//		terrainScript = GetComponent<TerrainScript>().gameObject;
+//		var targetScript: ScriptName = targetObj.GetComponent(ScriptName);
+		terrainScript = terrain.GetComponent<TerrainScript>();
+
 
 		size = terrainScript.GetSize ();
 		scale = terrainScript.GetScale ();
-		tall = terrainScript.GetHeight(0, 0);
-		transform.position = new Vector3(0f, tall, 0f); // player start position
-//		Debug.Log("Start Position: ("+ transform.position.x +","+ transform.position.y +","+transform.position.x +")");
+		transform.position = new Vector3(0f, terrainScript.GetHeight(0, 0) + 50, 0f); // player start position
+		Debug.Log("Start Position: ("+ transform.position.x +","+ transform.position.y +","+transform.position.x +")");
 
-//		minMapBound = new Vector3(minPositionX, 0, minPositionZ);
-//		maxMapBound = new Vector3 (maxPositionX, 0, maxPositionZ);
+		minPosition = 0;
+		maxPosition = size - 1;
+
+		Debug.Log ("minPosition:" + minPosition);
+		Debug.Log ("maxPosition:" + maxPosition);
+
+		minMapBound = new Vector3(minPosition, terrainScript.GetHeight(minPosition, minPosition), minPosition);
+		maxMapBound = new Vector3 (maxPosition, terrainScript.GetHeight(maxPosition, maxPosition), maxPosition);
+		Debug.Log("minMapBound: ("+ minMapBound.x +","+ minMapBound.y +","+minMapBound.z +")");
+		Debug.Log("maxMapBound: ("+ maxMapBound.x +","+ maxMapBound.y +","+maxMapBound.z +")");
 	}
 	
 	// Update is called once per frame
@@ -106,16 +115,20 @@ public class PlayerController : MonoBehaviour {
 
 		transform.Translate (straffe, height, translation); 
 
-//		if (transform.position.x >= maxPositionX) {
-//			transform.position.x = maxMapBound.x;
-//		} else if (transform.position.x <= minPositionX) {
-//			transform.position.x = minMapBound.x;
-//		}
-//		if (transform.position.z >= maxPositionZ) {
-//			transform.position.z = maxMapBound.x;
-//		} else if (transform.position.z <= maxPositionZ) {
-//			transform.position.z = minMapBound.x;
-//		}
+		if (transform.position.x > maxMapBound.x) {
+			transform.position = new Vector3(maxMapBound.x, transform.position.y, transform.position.z);
+			Debug.Log ("x too large: " + transform.position.x);
+		} else if (transform.position.x < minMapBound.x) {
+			transform.position = new Vector3(minMapBound.x, transform.position.y, transform.position.z);
+			Debug.Log ("x too small: " + transform.position.x);
+		}
+		if (transform.position.z > maxMapBound.z) {
+			transform.position = new Vector3(transform.position.x, transform.position.y, maxMapBound.z);
+			Debug.Log ("z too large: " + transform.position.z);
+		} else if (transform.position.z < minMapBound.z) {
+			transform.position = new Vector3(transform.position.x, transform.position.y, minMapBound.z);
+			Debug.Log ("z too small: " + transform.position.z);
+		}
 
 
 

@@ -159,6 +159,9 @@ public class TerrainScript : MonoBehaviour {
 	}
 
 	public float GetHeight(int x, int z) {
+		Debug.Log("x"+x);
+		Debug.Log("z"+z);
+			
 		return heightMap [x, z];
 	}
 }
