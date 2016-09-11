@@ -12,6 +12,10 @@ public class TerrainScript : MonoBehaviour {
 	private Vector3[] vertices;
 	private int scale = 10;
 	// Use this for initialization
+
+	private MeshFilter terrainMesh;
+
+
 	void Start () {
 
 		dimension = 7;
@@ -22,9 +26,8 @@ public class TerrainScript : MonoBehaviour {
 		heightMap = new float[size, size];
 		vertices = new Vector3[size * size];
 
-		MeshFilter terrainMesh = GetComponent<MeshFilter> ();
+		terrainMesh = GetComponent<MeshFilter> ();
 		terrainMesh.mesh = this.CreateTerrainMesh ();
-		//MeshRenderer renderer = this.gameObject.AddComponent<MeshRenderer> ();
 	}
 	
 	// Update is called once per frame
@@ -34,6 +37,10 @@ public class TerrainScript : MonoBehaviour {
 		// Set blend uniform parameter in an oscillating fashion to demonstrate 
 		// blending shader (challenge question)
 		renderer.material.SetFloat("_BlendFct", ((int)Mathf.Sin(Time.time) + 1.0f) / 2.0f);	
+
+		// Add collider to mesh 
+		GetComponent<MeshCollider> ().sharedMesh = terrainMesh.mesh; 
+
 	}
 
 	private Mesh CreateTerrainMesh(){

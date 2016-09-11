@@ -33,8 +33,14 @@ public class PlayerController : MonoBehaviour {
 
 	private Vector3 targetEuler = new Vector3 (0, 0, 0);
 	private Vector3 currEuler = new Vector3 (0, 0, 0);
-	private float rollingSpeed = 5.0f;
-	private float rollingAngle = 5.0f;
+	private float rollingSpeed = 2.0f;
+	private float rollingAngle = 2.0f;
+
+
+	private float errorValue = 5.0f; // prevent the player from being out of the terrain
+	private int playerStartPositionX = 10;	// x coordinator of the player start position
+	private int playerStartPositionY = 10; // y coordinator of the player start position
+	private float higher = 50.0f;	// how much the player is higher than the terrain at the start point
 
 
 	GameObject gameCamera;	// controlling the camera for rotating purpose
@@ -52,7 +58,7 @@ public class PlayerController : MonoBehaviour {
 		size = terrainScript.GetSize ();
 		scale = terrainScript.GetScale ();
 		Debug.Log("size: "+size+"scale: " + scale);
-		transform.position = new Vector3(0f, terrainScript.GetHeight(0, 0) + 50, 0f); // player start position
+		transform.position = new Vector3(playerStartPositionX, terrainScript.GetHeight(playerStartPositionX, playerStartPositionY) + higher, playerStartPositionY); // player start position
 		Debug.Log("Start Position: ("+ transform.position.x +","+ transform.position.y +","+transform.position.x +")");
 
 		minPosition = 0;
@@ -181,61 +187,35 @@ public class PlayerController : MonoBehaviour {
 		
 
 	}
-//
-//	private bool isOutOfBound(){
-//		if (transform.position.x > maxPosition) {
-//			//			transform.position = new Vector3(maxPosition, transform.position.y, transform.position.z);
-////			transform.position = previousPosition;
-//			return true;
-//			Debug.Log ("x too large: " + maxPosition);
-//		} else if (transform.position.x < 0) {
-//			//			transform.position = new Vector3(0, transform.position.y, transform.position.z);
-////			transform.position = previousPosition;
-//			return true;
-//			Debug.Log ("x too small: " + 0);
-//		}
-//		if (transform.position.z > maxPosition) {
-//			//			transform.position = new Vector3(transform.position.x, transform.position.y, maxPosition);
-////			transform.position = previousPosition;
-//			return true;
-//			Debug.Log ("z too large: " + maxPosition);
-//		} else if (transform.position.z < 0) {
-//			//			transform.position = new Vector3(transform.position.x, transform.position.y, 0);
-////			transform.position = previousPosition;
-//			return true;
-//			Debug.Log ("z too small: " + 0);
-//		}
-//
-//		return false;
-//	}
+
 
 	private bool isXOutOfBound(){
-		if (transform.position.x > maxPosition) {
+		if (transform.position.x > (maxPosition - errorValue)) {
 			//			transform.position = new Vector3(maxPosition, transform.position.y, transform.position.z);
 			//			transform.position = previousPosition;
+			Debug.Log ("x too large: " + (maxPosition - errorValue));
 			return true;
-			Debug.Log ("x too large: " + maxPosition);
-		} else if (transform.position.x < 0) {
+		} else if (transform.position.x < errorValue) {
 			//			transform.position = new Vector3(0, transform.position.y, transform.position.z);
 			//			transform.position = previousPosition;
+			Debug.Log ("x too small: " + errorValue);
 			return true;
-			Debug.Log ("x too small: " + 0);
 		}
 
 		return false;
 	}
 
 	private bool isZOutOfBound(){
-		if (transform.position.z > maxPosition) {
+		if (transform.position.z > (maxPosition - errorValue)) {
 			//			transform.position = new Vector3(transform.position.x, transform.position.y, maxPosition);
 			//			transform.position = previousPosition;
+			Debug.Log ("z too large: " + (maxPosition - errorValue));
 			return true;
-			Debug.Log ("z too large: " + maxPosition);
-		} else if (transform.position.z < 0) {
+		} else if (transform.position.z < errorValue) {
 			//			transform.position = new Vector3(transform.position.x, transform.position.y, 0);
 			//			transform.position = previousPosition;
+			Debug.Log ("z too small: " + errorValue);
 			return true;
-			Debug.Log ("z too small: " + 0);
 		}
 		return false;
 	}
