@@ -30,6 +30,13 @@ public class PlayerController : MonoBehaviour {
 	private int minPosition;
 
 
+
+	private Vector3 targetEuler = new Vector3 (0, 0, 0);
+	private Vector3 currEuler = new Vector3 (0, 0, 0);
+	private float rollingSpeed = 5.0f;
+	private float rollingAngle = 5.0f;
+
+
 	GameObject gameCamera;	// controlling the camera for rotating purpose
 
 	// Use this for initialization
@@ -58,6 +65,9 @@ public class PlayerController : MonoBehaviour {
 		maxMapBound = new Vector3 (size-1, terrainScript.GetHeight(size-1, size-1), size-1);
 		Debug.Log("minMapBound: ("+ minMapBound.x +","+ minMapBound.y +","+minMapBound.z +")");
 		Debug.Log("maxMapBound: ("+ maxMapBound.x +","+ maxMapBound.y +","+maxMapBound.z +")");
+
+
+
 	}
 	
 	// Update is called once per frame
@@ -171,38 +181,27 @@ public class PlayerController : MonoBehaviour {
 	}
 
 	void CameraRollingUpdate() {
-		float speed = 10f;
-		Vector3 targetEuler = new Vector3 (0, 0, 0);
-		Vector3 currEuler = new Vector3 (0, 0, 0);
-		float rollingSpeed = 10.0f;
-		float rollingAngle = 10.0f;
-
-		float rolling = 
 		
 		
-		if (Input.GetKeyDown (KeyCode.Q)) {
+		if (Input.GetKey (KeyCode.Q)) {
 			Debug.Log ("Q pressed");
 //			gameCamera.transform.Rotate (Vector3.forward * speed * Time.deltaTime);
 //			gameCamera.transform.Rotate(0,0,speed*Time.deltaTime);
 //			gameCamera.transform.localEulerAngles = new Vector3(0, 0, rollingSpeed*Time.deltaTime);
-//			targetEuler.z += rollingAngle;
-
-
+			targetEuler.z += rollingAngle;
 
 		}
-		if (Input.GetKeyDown (KeyCode.E)) {
+		if (Input.GetKey (KeyCode.E)) {
 			Debug.Log ("E pressed");
 //			gameCamera.transform.Rotate (-Vector3.forward * speed * Time.deltaTime);
 //			gameCamera.transform.localEulerAngles = new Vector3(0, 0, -rollingSpeed*Time.deltaTime);
-//			targetEuler.z += rollingAngle;
-
-
+			targetEuler.z -= rollingAngle;
 
 		}
 
-//		currEuler = Vector3.Lerp (currEuler, targetEuler, Time.deltaTime * rollingSpeed);
-//		Debug.Log ("currEuler(" + currEuler.x + "," + currEuler.y + "," + currEuler.z + ")");
-//		gameCamera.transform.localEulerAngles =  currEuler;
+		currEuler = Vector3.Lerp (currEuler, targetEuler, Time.deltaTime * rollingSpeed);
+		Debug.Log ("currEuler(" + currEuler.x + "," + currEuler.y + "," + currEuler.z + ")");
+		gameCamera.transform.localEulerAngles =  currEuler;
 
 	}
 
