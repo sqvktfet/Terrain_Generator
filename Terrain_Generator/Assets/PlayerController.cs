@@ -17,8 +17,8 @@ public class PlayerController : MonoBehaviour {
 	public Transform terrain;
 	private TerrainScript terrainScript;
 
-//	public Text playerPositionText;
-//	public Text mouseLookText;
+	public Text playerPositionText;
+	public Text mouseLookText;
 
 	private int size;
 	private int scale;
@@ -44,17 +44,18 @@ public class PlayerController : MonoBehaviour {
 
 		size = terrainScript.GetSize ();
 		scale = terrainScript.GetScale ();
+		Debug.Log("size: "+size+"scale: " + scale);
 		transform.position = new Vector3(0f, terrainScript.GetHeight(0, 0) + 50, 0f); // player start position
 		Debug.Log("Start Position: ("+ transform.position.x +","+ transform.position.y +","+transform.position.x +")");
 
 		minPosition = 0;
-		maxPosition = size - 1;
+		maxPosition = size*scale;
 
 		Debug.Log ("minPosition:" + minPosition);
 		Debug.Log ("maxPosition:" + maxPosition);
 
-		minMapBound = new Vector3(minPosition, terrainScript.GetHeight(minPosition, minPosition), minPosition);
-		maxMapBound = new Vector3 (maxPosition, terrainScript.GetHeight(maxPosition, maxPosition), maxPosition);
+		minMapBound = new Vector3(0, terrainScript.GetHeight(0, 0), 0);
+		maxMapBound = new Vector3 (size-1, terrainScript.GetHeight(size-1, size-1), size-1);
 		Debug.Log("minMapBound: ("+ minMapBound.x +","+ minMapBound.y +","+minMapBound.z +")");
 		Debug.Log("maxMapBound: ("+ maxMapBound.x +","+ maxMapBound.y +","+maxMapBound.z +")");
 	}
@@ -64,13 +65,14 @@ public class PlayerController : MonoBehaviour {
 
 
 		PositionUpdate ();
-		RotationUpdate ();
+		MouseViewRotationUpdate ();
+		CameraRollingUpdate ();
 
 
 		if(Input.GetKeyDown(KeyCode.Escape)) {
 			// when escape pressed, show the cursor in the game view
 			Cursor.lockState = CursorLockMode.None;
-			Debug.Log("escape pressed");
+//			Debug.Log("escape pressed");
 		}
 	}
 
@@ -115,31 +117,31 @@ public class PlayerController : MonoBehaviour {
 
 		transform.Translate (straffe, height, translation); 
 
-		if (transform.position.x > maxMapBound.x) {
-			transform.position = new Vector3(maxMapBound.x, transform.position.y, transform.position.z);
-			Debug.Log ("x too large: " + transform.position.x);
-		} else if (transform.position.x < minMapBound.x) {
-			transform.position = new Vector3(minMapBound.x, transform.position.y, transform.position.z);
-			Debug.Log ("x too small: " + transform.position.x);
+		if (transform.position.x > maxPosition) {
+			transform.position = new Vector3(maxPosition, transform.position.y, transform.position.z);
+			Debug.Log ("x too large: " + maxPosition);
+		} else if (transform.position.x < 0) {
+			transform.position = new Vector3(0, transform.position.y, transform.position.z);
+			Debug.Log ("x too small: " + 0);
 		}
-		if (transform.position.z > maxMapBound.z) {
-			transform.position = new Vector3(transform.position.x, transform.position.y, maxMapBound.z);
-			Debug.Log ("z too large: " + transform.position.z);
-		} else if (transform.position.z < minMapBound.z) {
-			transform.position = new Vector3(transform.position.x, transform.position.y, minMapBound.z);
-			Debug.Log ("z too small: " + transform.position.z);
+		if (transform.position.z > maxPosition) {
+			transform.position = new Vector3(transform.position.x, transform.position.y, maxPosition);
+			Debug.Log ("z too large: " + maxPosition);
+		} else if (transform.position.z < 0) {
+			transform.position = new Vector3(transform.position.x, transform.position.y, 0);
+			Debug.Log ("z too small: " + 0);
 		}
 
 
 
-//		playerPositionText.text = "Translation: " + translation + "\nHeight: " + height + "\nstraffe: " + straffe +
-//			"\nPosition: (" + transform.position.x + ", " + transform.position.y +", " +transform.position.z + ")";
+		playerPositionText.text = "Translation: " + translation + "\nHeight: " + height + "\nstraffe: " + straffe +
+			"\nPosition: (" + transform.position.x + ", " + transform.position.y +", " +transform.position.z + ")";
 
 
 	}
 
 
-	void RotationUpdate () {
+	void MouseViewRotationUpdate () {
 		Vector2 mouseDelta;	// for changing smoothily
 		mouseDelta = new Vector2 (Input.GetAxisRaw ("Mouse X"), Input.GetAxisRaw ("Mouse Y"));
 		mouseDelta = Vector2.Scale (mouseDelta, new Vector2 (sensitivity * smoothing, sensitivity * smoothing));
@@ -156,15 +158,43 @@ public class PlayerController : MonoBehaviour {
 
 		// rotate the character rather than only the camera itself
 		transform.localRotation = Quaternion.AngleAxis (mouseLook.x, transform.up);
-//		mouseLookText.text = "\n\n\n\nMouseLook.x: " + mouseLook.x;
-//		mouseLookText.text += ("\nMouseLook.y: " + mouseLook.y);
+		mouseLookText.text = "\n\n\n\nMouseLook.x: " + mouseLook.x;
+		mouseLookText.text += ("\nMouseLook.y: " + mouseLook.y);
 
 
 		if (mouseLook.x >= 360 || mouseLook.x <= -360) {
 			mouseLook.x = 0;
 		}
 
-//		Debug.Log ("Velocity" + this.gameObject.GetComponent<Rigidbody> ().velocity);
+		
+
+	}
+
+	void CameraRollingUpdate() {
+		float speed;
+		Vector3 targetEuler = new Vector3 (0, 0, 0);
+		Vector3 currEuler = new Vector3 (0, 0, 0);
+		float rollingSpeed = 10.0f;
+		float rollingAngle = 10.0f;
+		
+		
+		if (Input.GetKeyDown (KeyCode.Q)) {
+			Debug.Log ("Q pressed");
+//			gameCamera.transform.Rotate (Vector3.forward * speed * Time.deltaTime);
+			gameCamera.transform.localEulerAngles = new Vector3(0, 0, rollingSpeed);
+//			targetEuler.z += rollingAngle;
+
+		}
+		if (Input.GetKeyDown (KeyCode.E)) {
+			Debug.Log ("E pressed");
+//			gameCamera.transform.Rotate (-Vector3.forward * speed * Time.deltaTime);
+			gameCamera.transform.localEulerAngles = new Vector3(0, 0, -rollingSpeed);
+//			targetEuler.z += rollingAngle;
+		}
+
+//		currEuler = Vector3.Lerp (currEuler, targetEuler, Time.deltaTime * rollingSpeed);
+//		Debug.Log ("currEuler(" + currEuler.x + "," + currEuler.y + "," + currEuler.z + ")");
+//		gameCamera.transform.localEulerAngles =  currEuler;
 
 	}
 
