@@ -171,7 +171,7 @@ public class PlayerController : MonoBehaviour {
 	}
 
 	void CameraRollingUpdate() {
-		float speed;
+		float speed = 10f;
 		Vector3 targetEuler = new Vector3 (0, 0, 0);
 		Vector3 currEuler = new Vector3 (0, 0, 0);
 		float rollingSpeed = 10.0f;
@@ -181,14 +181,14 @@ public class PlayerController : MonoBehaviour {
 		if (Input.GetKeyDown (KeyCode.Q)) {
 			Debug.Log ("Q pressed");
 //			gameCamera.transform.Rotate (Vector3.forward * speed * Time.deltaTime);
-			gameCamera.transform.localEulerAngles = new Vector3(0, 0, rollingSpeed);
+			gameCamera.transform.localEulerAngles = new Vector3(0, 0, rollingSpeed*Time.deltaTime);
 //			targetEuler.z += rollingAngle;
 
 		}
 		if (Input.GetKeyDown (KeyCode.E)) {
 			Debug.Log ("E pressed");
 //			gameCamera.transform.Rotate (-Vector3.forward * speed * Time.deltaTime);
-			gameCamera.transform.localEulerAngles = new Vector3(0, 0, -rollingSpeed);
+			gameCamera.transform.localEulerAngles = new Vector3(0, 0, -rollingSpeed*Time.deltaTime);
 //			targetEuler.z += rollingAngle;
 		}
 
