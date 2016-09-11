@@ -38,8 +38,8 @@ public class PlayerController : MonoBehaviour {
 
 
 	private float errorValue = 5.0f; // prevent the player from being out of the terrain
-	private int playerStartPositionX = 10;	// x coordinator of the player start position
-	private int playerStartPositionY = 10; // y coordinator of the player start position
+	private int playerStartPositionX = 100;	// x coordinator of the player start position
+	private int playerStartPositionZ = 100; // y coordinator of the player start position
 	private float higher = 50.0f;	// how much the player is higher than the terrain at the start point
 
 
@@ -58,7 +58,7 @@ public class PlayerController : MonoBehaviour {
 		size = terrainScript.GetSize ();
 		scale = terrainScript.GetScale ();
 		Debug.Log("size: "+size+"scale: " + scale);
-		transform.position = new Vector3(playerStartPositionX, terrainScript.GetHeight(playerStartPositionX, playerStartPositionY) + higher, playerStartPositionY); // player start position
+		transform.position = new Vector3(playerStartPositionX, terrainScript.GetHeight(playerStartPositionX, playerStartPositionZ) + higher, playerStartPositionZ); // player start position
 		Debug.Log("Start Position: ("+ transform.position.x +","+ transform.position.y +","+transform.position.x +")");
 
 		minPosition = 0;

@@ -15,6 +15,9 @@ public class TerrainScript : MonoBehaviour {
 
 	private MeshFilter terrainMesh;
 
+	public Shader shader;
+	private Color[] colorlist;
+	private int numberOfDegrees;
 
 	void Start () {
 
@@ -25,6 +28,16 @@ public class TerrainScript : MonoBehaviour {
 //		rangeOfNoiseList = new float[]{30.0f,15.0f,10.0f,7.0f,5.0f,4.0f};
 		heightMap = new float[size, size];
 		vertices = new Vector3[size * size];
+		colorlist = new Color[]{ 
+			converColor(153f, 76f, 0f, 1f),
+			converColor(153f, 153f, 0f, 1f),
+			converColor(102f, 204f, 0f, 1f),
+			converColor(0f, 204f, 0f, 1f),
+			converColor(178f, 255f, 102f, 1f),
+			converColor(153f, 255f, 153f, 1f),
+			converColor(255f, 255f, 255f, 1f)
+		};
+		numberOfDegrees = colorlist.Length;
 
 		terrainMesh = GetComponent<MeshFilter> ();
 		terrainMesh.mesh = this.CreateTerrainMesh ();
@@ -122,12 +135,31 @@ public class TerrainScript : MonoBehaviour {
 		}
 		/***** Generate HeightMap *****/
 
+		// get highest point and lowest point
+		float top, bottom;
+		top = bottom = heightMap[0,0];
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
+				if (top < heightMap [i,j])
+					top = heightMap [i,j];
+				if (bottom > heightMap [i,j])
+					bottom = heightMap [i,j];
+			}
+		}
+
 		// Define the vertices. 
 		for (int i = 0; i < vertices.Length; i++) {
 			vertices [i] = new Vector3 ((float)(i % size * scale), heightMap [i / size, i % size], (float)((size - i / size) * scale));
 //			Debug.Log (heightMap [i / size, i % size]);
 		}
 		m.vertices = vertices;
+
+		// Add color to vertices
+		Color[] colors = new Color[vertices.Length];
+		for (int i = 0; i < vertices.Length; i++) {
+			colors [i] = colorlist[degreeOfColor (top, bottom, vertices [i].y)];
+		}
+		m.colors = colors;
 
 		// Automatically define the triangles based on the number of vertices
 		int numOfSquares = (int)Math.Pow(4,dimension);
@@ -163,6 +195,36 @@ public class TerrainScript : MonoBehaviour {
 
 	public int GetScale() {
 		return scale;
+	}
+
+	private int degreeOfColor(float top, float bottom, float height){
+		int degree;
+		float difference = top - bottom;
+		float relativeHeight = height - bottom;
+		float percentile = relativeHeight / difference;
+
+		if (percentile <= 0.1f)
+			degree = 0;
+		else if (percentile <= 0.23f)
+			degree = 1;
+		else if (percentile <= 0.40f)
+			degree = 2;
+		else if (percentile <= 0.58f)
+			degree = 3;
+		else if (percentile <= 0.75f)
+			degree = 4;
+		else if (percentile <= 0.90f)
+			degree = 5;
+		else 
+			degree = 6;
+
+		return degree;
+	}
+
+	private Color converColor(float r, float g, float b, float a){
+		Color result;
+		result = new Color (r / 255.0f, g / 255.0f, b / 255.0f, a);
+		return result;
 	}
 
 	public float GetHeight(int x, int z) {
