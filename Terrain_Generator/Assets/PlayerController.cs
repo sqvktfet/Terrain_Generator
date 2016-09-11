@@ -95,6 +95,9 @@ public class PlayerController : MonoBehaviour {
 		float straffe = 0;
 
 
+		Vector3 previousPosition = transform.position;
+
+
 		if(Input.GetKey(KeyCode.W)) {
 			translation += speed * Time.deltaTime;
 			forwards = 1;
@@ -109,7 +112,9 @@ public class PlayerController : MonoBehaviour {
 		if(Input.GetKey(KeyCode.D)) {
 			straffe += speed * Time.deltaTime;
 		}
-			
+
+
+
 		height = Mathf.Sqrt(translation*translation+straffe*straffe) * Mathf.Sin (Mathf.Deg2Rad * mouseLook.y) * forwards;
 
 		if (Input.GetKey (KeyCode.W) || Input.GetKey (KeyCode.A) || Input.GetKey (KeyCode.S) || Input.GetKey (KeyCode.D)) {
@@ -127,20 +132,17 @@ public class PlayerController : MonoBehaviour {
 
 		transform.Translate (straffe, height, translation); 
 
-		if (transform.position.x > maxPosition) {
-			transform.position = new Vector3(maxPosition, transform.position.y, transform.position.z);
-			Debug.Log ("x too large: " + maxPosition);
-		} else if (transform.position.x < 0) {
-			transform.position = new Vector3(0, transform.position.y, transform.position.z);
-			Debug.Log ("x too small: " + 0);
-		}
-		if (transform.position.z > maxPosition) {
-			transform.position = new Vector3(transform.position.x, transform.position.y, maxPosition);
-			Debug.Log ("z too large: " + maxPosition);
-		} else if (transform.position.z < 0) {
-			transform.position = new Vector3(transform.position.x, transform.position.y, 0);
-			Debug.Log ("z too small: " + 0);
-		}
+		float tempX, tempZ;
+		if (isXOutOfBound ())
+			tempX = previousPosition.x;
+		else
+			tempX = transform.position.x;
+		if (isZOutOfBound ())
+			tempZ = previousPosition.z;
+		else
+			tempZ = transform.position.z;
+		transform.position = new Vector3 (tempX, transform.position.y, tempZ);
+
 
 
 
@@ -179,6 +181,64 @@ public class PlayerController : MonoBehaviour {
 		
 
 	}
+//
+//	private bool isOutOfBound(){
+//		if (transform.position.x > maxPosition) {
+//			//			transform.position = new Vector3(maxPosition, transform.position.y, transform.position.z);
+////			transform.position = previousPosition;
+//			return true;
+//			Debug.Log ("x too large: " + maxPosition);
+//		} else if (transform.position.x < 0) {
+//			//			transform.position = new Vector3(0, transform.position.y, transform.position.z);
+////			transform.position = previousPosition;
+//			return true;
+//			Debug.Log ("x too small: " + 0);
+//		}
+//		if (transform.position.z > maxPosition) {
+//			//			transform.position = new Vector3(transform.position.x, transform.position.y, maxPosition);
+////			transform.position = previousPosition;
+//			return true;
+//			Debug.Log ("z too large: " + maxPosition);
+//		} else if (transform.position.z < 0) {
+//			//			transform.position = new Vector3(transform.position.x, transform.position.y, 0);
+////			transform.position = previousPosition;
+//			return true;
+//			Debug.Log ("z too small: " + 0);
+//		}
+//
+//		return false;
+//	}
+
+	private bool isXOutOfBound(){
+		if (transform.position.x > maxPosition) {
+			//			transform.position = new Vector3(maxPosition, transform.position.y, transform.position.z);
+			//			transform.position = previousPosition;
+			return true;
+			Debug.Log ("x too large: " + maxPosition);
+		} else if (transform.position.x < 0) {
+			//			transform.position = new Vector3(0, transform.position.y, transform.position.z);
+			//			transform.position = previousPosition;
+			return true;
+			Debug.Log ("x too small: " + 0);
+		}
+
+		return false;
+	}
+
+	private bool isZOutOfBound(){
+		if (transform.position.z > maxPosition) {
+			//			transform.position = new Vector3(transform.position.x, transform.position.y, maxPosition);
+			//			transform.position = previousPosition;
+			return true;
+			Debug.Log ("z too large: " + maxPosition);
+		} else if (transform.position.z < 0) {
+			//			transform.position = new Vector3(transform.position.x, transform.position.y, 0);
+			//			transform.position = previousPosition;
+			return true;
+			Debug.Log ("z too small: " + 0);
+		}
+		return false;
+	}
 
 	void CameraRollingUpdate() {
 		
@@ -201,7 +261,8 @@ public class PlayerController : MonoBehaviour {
 
 		currEuler = Vector3.Lerp (currEuler, targetEuler, Time.deltaTime * rollingSpeed);
 		Debug.Log ("currEuler(" + currEuler.x + "," + currEuler.y + "," + currEuler.z + ")");
-		gameCamera.transform.localEulerAngles =  currEuler;
+//		gameCamera.transform.localEulerAngles =  currEuler;//
+		gameCamera.transform.localRotation = Quaternion.AngleAxis (currEuler.z, Vector3.forward) * gameCamera.transform.localRotation;
 
 	}
 
