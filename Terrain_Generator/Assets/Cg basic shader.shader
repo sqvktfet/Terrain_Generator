@@ -1,6 +1,9 @@
 ﻿Shader "Cg basic shader" { // defines the name of the shader 
    SubShader { // Unity chooses the subshader that fits the GPU best
       Pass { // some shaders require multiple passes
+
+      	 cull off
+
          CGPROGRAM // here begins the part in Unity's Cg
 
          #pragma vertex vert 

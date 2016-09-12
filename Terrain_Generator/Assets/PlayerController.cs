@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class PlayerController : MonoBehaviour {
 
 	// for position calculation
-	public float speed = 50.0f;
+	public float movingSpeed = 50.0f;
 
 	// for rotation calculation
 	public float sensitivity = 5.0f;
@@ -13,152 +13,148 @@ public class PlayerController : MonoBehaviour {
 	private Vector2 mouseLook; // how much total movement the mouse has made
 	private Vector2 smoothV;
 
+	// for Q/E rolling control
+	private float rollingSpeed = 2.0f;
+	private float rollingAngle = 2.0f;
+	private Vector3 targetEuler = new Vector3 (0, 0, 0);
+	private Vector3 currEuler = new Vector3 (0, 0, 0);
 
+	// for terrain mesh generating
 	public Transform terrain;
 	private TerrainScript terrainScript;
 
+	// for text display
 	public Text playerPositionText;
 	public Text mouseLookText;
 
+	// property of terrain
 	private int size;
 	private int scale;
-	private float tall;
 
-	private Vector3 maxMapBound;
-	private Vector3 minMapBound;
+	// the upperbond and the lowerbond position value of the terrain
 	private int maxPosition;
 	private int minPosition;
 
+	// the upperbond and the lowerbond position value of the player
+	private int maxBound;
+	private int minBound;
 
-
-	private Vector3 targetEuler = new Vector3 (0, 0, 0);
-	private Vector3 currEuler = new Vector3 (0, 0, 0);
-	private float rollingSpeed = 2.0f;
-	private float rollingAngle = 2.0f;
-
-
-	private float errorValue = 5.0f; // prevent the player from being out of the terrain
+	// the start position of the player
 	private int playerStartPositionX = 100;	// x coordinator of the player start position
 	private int playerStartPositionZ = 100; // y coordinator of the player start position
-	private float higher = 50.0f;	// how much the player is higher than the terrain at the start point
+	private float higher = 100.0f;	// how much the player is higher than the terrain at the start point
 
+	// how far the player is allowed to reach the terrain border
+	private int errorValue = 50; // prevent the player from being out of the terrain
 
-	GameObject gameCamera;	// controlling the camera for rotating purpose
+	private GameObject gameCamera;	// controlling the camera for rotating purpose
 
 	// Use this for initialization
 	void Start () {
+
 		// cursor is not going to be displayed in the game view
 		Cursor.lockState = CursorLockMode.Locked;
+
+		// get the camera object which is the child of player
 		gameCamera = this.transform.GetChild(0).gameObject;	// which is the camera object
 
-//		var targetScript: ScriptName = targetObj.GetComponent(ScriptName);
+		// get the terrain size and scale value
 		terrainScript = terrain.GetComponent<TerrainScript>();
-
-
 		size = terrainScript.GetSize ();
 		scale = terrainScript.GetScale ();
-		Debug.Log("size: "+size+"scale: " + scale);
-		transform.position = new Vector3(playerStartPositionX, terrainScript.GetHeight(playerStartPositionX, playerStartPositionZ) + higher, playerStartPositionZ); // player start position
-		Debug.Log("Start Position: ("+ transform.position.x +","+ transform.position.y +","+transform.position.x +")");
 
 		minPosition = 0;
 		maxPosition = size*scale;
 
-		Debug.Log ("minPosition:" + minPosition);
-		Debug.Log ("maxPosition:" + maxPosition);
+		maxBound = maxPosition - errorValue;
+		minBound = minPosition + errorValue;
 
-		minMapBound = new Vector3(0, terrainScript.GetHeight(0, 0), 0);
-		maxMapBound = new Vector3 (size-1, terrainScript.GetHeight(size-1, size-1), size-1);
-		Debug.Log("minMapBound: ("+ minMapBound.x +","+ minMapBound.y +","+minMapBound.z +")");
-		Debug.Log("maxMapBound: ("+ maxMapBound.x +","+ maxMapBound.y +","+maxMapBound.z +")");
-
-
-
+		// put the player to the start position
+		transform.position = new Vector3(playerStartPositionX, 
+			terrainScript.GetHeight(playerStartPositionX, playerStartPositionZ) + higher, playerStartPositionZ);
 	}
-	
+
 	// Update is called once per frame
 	void Update () {
-
 
 		PositionUpdate ();
 		MouseViewRotationUpdate ();
 		CameraRollingUpdate ();
 
-
+		// when escape button pressed, show the cursor in the game view
 		if(Input.GetKeyDown(KeyCode.Escape)) {
-			// when escape pressed, show the cursor in the game view
 			Cursor.lockState = CursorLockMode.None;
-//			Debug.Log("escape pressed");
 		}
 	}
 
 
+	/**
+	 * player's movement control
+	 */
 	void PositionUpdate() {
-				
+
 		int forwards = 0; // when W pressed, it is 1, when S pressed, it is -1
-		float translation = 0;
-		float height = 0;
-		float straffe = 0;
+		float translation = 0;	// movement in z axis
+		float height = 0;	// movement in y axis
+		float straffe = 0;	// movement in x axis
 
+		// record the previousPosition
+//		Vector3 previousPosition = transform.position;
 
-		Vector3 previousPosition = transform.position;
-
-
+		// get the input of W,S,A,D button and calculate the movement 
 		if(Input.GetKey(KeyCode.W)) {
-			translation += speed * Time.deltaTime;
+			translation += movingSpeed * Time.deltaTime;
 			forwards = 1;
 		}
 		if(Input.GetKey(KeyCode.S)) {
-			translation -= speed * Time.deltaTime;
+			translation -= movingSpeed * Time.deltaTime;
 			forwards = -1;
 		}
 		if(Input.GetKey(KeyCode.A)) {
-			straffe -= speed * Time.deltaTime;
+			straffe -= movingSpeed * Time.deltaTime;
 		}
 		if(Input.GetKey(KeyCode.D)) {
-			straffe += speed * Time.deltaTime;
+			straffe += movingSpeed * Time.deltaTime;
 		}
-
-
 
 		height = Mathf.Sqrt(translation*translation+straffe*straffe) * Mathf.Sin (Mathf.Deg2Rad * mouseLook.y) * forwards;
 
-		if (Input.GetKey (KeyCode.W) || Input.GetKey (KeyCode.A) || Input.GetKey (KeyCode.S) || Input.GetKey (KeyCode.D)) {
-//			Debug.Log ("-mouseLook.y: " + -mouseLook.y);
-//			Debug.Log ("Sin: " + Mathf.Sin (Mathf.Deg2Rad * mouseLook.y));
-//			Debug.Log ("Sqrt: " + Mathf.Sqrt (translation * translation + straffe * straffe));
-//			Debug.Log ("Height: " + height);
-		} else {
-			// 
+		// when no movement control key pressed, avoid to change player's position
+		if (!(Input.GetKey (KeyCode.W) || Input.GetKey (KeyCode.A) || Input.GetKey (KeyCode.S) || Input.GetKey (KeyCode.D))) {
 			this.gameObject.GetComponent<Rigidbody> ().velocity = Vector3.zero;
 		}
 
-
-
-
+		// do the movement translation based on the key pressed
 		transform.Translate (straffe, height, translation); 
 
+		// if the player is out of bound, set the position to previous position 
 		float tempX, tempZ;
-		if (isXOutOfBound ())
-			tempX = previousPosition.x;
-		else
+		if (isXOutOfBound () == 1) {
+			tempX = maxBound;
+		} else if (isXOutOfBound () == 2) {
+			tempX = minBound;
+		} else {
 			tempX = transform.position.x;
-		if (isZOutOfBound ())
-			tempZ = previousPosition.z;
-		else
+		}
+
+		if (isZOutOfBound () == 1) {
+			tempZ = maxBound;
+		} else if (isZOutOfBound () == 2) {
+			tempZ = minBound;
+		} else {
 			tempZ = transform.position.z;
+		}
 		transform.position = new Vector3 (tempX, transform.position.y, tempZ);
 
-
-
-
-		playerPositionText.text = "Translation: " + translation + "\nHeight: " + height + "\nstraffe: " + straffe +
-			"\nPosition: (" + transform.position.x + ", " + transform.position.y +", " +transform.position.z + ")";
-
+		// display the player's current position on the screen
+		playerPositionText.text = "Position: (" + transform.position.x + ", " + transform.position.y +", " +transform.position.z + ")";
 
 	}
 
 
+	/**
+	 * player's mouse rotation control
+	 */
 	void MouseViewRotationUpdate () {
 		Vector2 mouseDelta;	// for changing smoothily
 		mouseDelta = new Vector2 (Input.GetAxisRaw ("Mouse X"), Input.GetAxisRaw ("Mouse Y"));
@@ -183,73 +179,61 @@ public class PlayerController : MonoBehaviour {
 		if (mouseLook.x >= 360 || mouseLook.x <= -360) {
 			mouseLook.x = 0;
 		}
-
+	}
 		
 
-	}
-
-
-	private bool isXOutOfBound(){
-		if (transform.position.x > (maxPosition - errorValue)) {
-			//			transform.position = new Vector3(maxPosition, transform.position.y, transform.position.z);
-			//			transform.position = previousPosition;
-			Debug.Log ("x too large: " + (maxPosition - errorValue));
-			return true;
-		} else if (transform.position.x < errorValue) {
-			//			transform.position = new Vector3(0, transform.position.y, transform.position.z);
-			//			transform.position = previousPosition;
-			Debug.Log ("x too small: " + errorValue);
-			return true;
-		}
-
-		return false;
-	}
-
-	private bool isZOutOfBound(){
-		if (transform.position.z > (maxPosition - errorValue)) {
-			//			transform.position = new Vector3(transform.position.x, transform.position.y, maxPosition);
-			//			transform.position = previousPosition;
-			Debug.Log ("z too large: " + (maxPosition - errorValue));
-			return true;
-		} else if (transform.position.z < errorValue) {
-			//			transform.position = new Vector3(transform.position.x, transform.position.y, 0);
-			//			transform.position = previousPosition;
-			Debug.Log ("z too small: " + errorValue);
-			return true;
-		}
-		return false;
-	}
-
+	/**
+	 * player's view rolling control via Q E key press
+	 */
 	void CameraRollingUpdate() {
-		
-		
-		if (Input.GetKey (KeyCode.Q)) {
-			Debug.Log ("Q pressed");
-//			gameCamera.transform.Rotate (Vector3.forward * speed * Time.deltaTime);
-//			gameCamera.transform.Rotate(0,0,speed*Time.deltaTime);
-//			gameCamera.transform.localEulerAngles = new Vector3(0, 0, rollingSpeed*Time.deltaTime);
-			targetEuler.z += rollingAngle;
 
+		if (Input.GetKey (KeyCode.Q)) {
+			targetEuler.z += rollingAngle;
 		}
 		if (Input.GetKey (KeyCode.E)) {
-			Debug.Log ("E pressed");
-//			gameCamera.transform.Rotate (-Vector3.forward * speed * Time.deltaTime);
-//			gameCamera.transform.localEulerAngles = new Vector3(0, 0, -rollingSpeed*Time.deltaTime);
 			targetEuler.z -= rollingAngle;
-
 		}
 
 		currEuler = Vector3.Lerp (currEuler, targetEuler, Time.deltaTime * rollingSpeed);
 		Debug.Log ("currEuler(" + currEuler.x + "," + currEuler.y + "," + currEuler.z + ")");
-//		gameCamera.transform.localEulerAngles =  currEuler;//
 		gameCamera.transform.localRotation = Quaternion.AngleAxis (currEuler.z, Vector3.forward) * gameCamera.transform.localRotation;
 
 	}
 
-//	void OnCollisionEnter () {
-//		this.gameObject.GetComponent<Rigidbody>().velocity = Vector3.zero;
-//		
-//	}
+
+
+	/**
+	 * check whether the player's current X axis position is out of bound
+	 * if so, return true, otherwise return false
+	 * return 0 : not out of bound
+	 * return 1 : excceed maximum pos
+	 * return 2 : below minimum pos
+	 */
+	private int isXOutOfBound(){
+		if (transform.position.x > (maxPosition - errorValue)) {
+			return 1;
+		} else if (transform.position.x < minPosition + errorValue) {
+			return 2;
+		}
+		return 0;
+	}
+
+	/**
+	 * check whether the player's current Z axis position is out of bound
+	 * if so, return true, otherwise return false
+	 * return 0 : not out of bound
+	 * return 1 : excceed maximum pos
+	 * return 2 : below minimum pos
+	 */
+	private int isZOutOfBound(){
+		if (transform.position.z > (maxPosition - errorValue)) {
+			return 1;
+		} else if (transform.position.z < minPosition + errorValue) {
+			return 2;
+		}
+		return 0;
+	}
+
 }
 
 

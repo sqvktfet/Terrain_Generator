@@ -255,6 +255,7 @@ MonoBehaviour:
   dimension: 0
   seed: 0
   rangeOfNoise: 0
+  shader: {fileID: 0}
 --- !u!23 &629824097
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -265,7 +266,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_Materials:
-  - {fileID: 0}
+  - {fileID: 2100000, guid: 52660b26aa7bf48e3afcd1a711652b23, type: 2}
   m_SubsetIndices: 
   m_StaticBatchRoot: {fileID: 0}
   m_UseLightProbes: 1
@@ -433,7 +434,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 978e24cd2fd0e4f08bd993ccd74065e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 100
+  movingSpeed: 50
   sensitivity: 5
   smoothing: 2
   terrain: {fileID: 629824099}
