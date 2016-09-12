@@ -40,8 +40,8 @@ public class PlayerController : MonoBehaviour {
 	private int minBound;
 
 	// the start position of the player
-	private int playerStartPositionX = 100;	// x coordinator of the player start position
-	private int playerStartPositionZ = 100; // y coordinator of the player start position
+	private int playerStartPositionX = 300;	// x coordinator of the player start position
+	private int playerStartPositionZ = 300; // y coordinator of the player start position
 	private float higher = 100.0f;	// how much the player is higher than the terrain at the start point
 
 	// how far the player is allowed to reach the terrain border
@@ -71,7 +71,7 @@ public class PlayerController : MonoBehaviour {
 
 		// put the player to the start position
 		transform.position = new Vector3(playerStartPositionX, 
-			terrainScript.GetHeight(playerStartPositionX, playerStartPositionZ) + higher, playerStartPositionZ);
+			terrainScript.GetHeight(playerStartPositionX / scale, playerStartPositionZ / scale) + higher, playerStartPositionZ);
 	}
 
 	// Update is called once per frame
@@ -195,7 +195,6 @@ public class PlayerController : MonoBehaviour {
 		}
 
 		currEuler = Vector3.Lerp (currEuler, targetEuler, Time.deltaTime * rollingSpeed);
-		Debug.Log ("currEuler(" + currEuler.x + "," + currEuler.y + "," + currEuler.z + ")");
 		gameCamera.transform.localRotation = Quaternion.AngleAxis (currEuler.z, Vector3.forward) * gameCamera.transform.localRotation;
 
 	}

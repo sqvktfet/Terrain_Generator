@@ -25,17 +25,16 @@ public class TerrainScript : MonoBehaviour {
 		size = (int)(int)Math.Pow(2,dimension)+1;
 		seed = 500;
 		rangeOfNoise = 500.0f;
-//		rangeOfNoiseList = new float[]{30.0f,15.0f,10.0f,7.0f,5.0f,4.0f};
 		heightMap = new float[size, size];
 		vertices = new Vector3[size * size];
 		colorlist = new Color[]{ 
-			converColor(153f, 76f, 0f, 1f),
-			converColor(153f, 153f, 0f, 1f),
-			converColor(102f, 204f, 0f, 1f),
-			converColor(0f, 204f, 0f, 1f),
-			converColor(178f, 255f, 102f, 1f),
-			converColor(153f, 255f, 153f, 1f),
-			converColor(255f, 255f, 255f, 1f)
+			convertColor(153f, 76f, 0f, 1f),
+			convertColor(153f, 153f, 0f, 1f),
+			convertColor(102f, 204f, 0f, 1f),
+			convertColor(0f, 204f, 0f, 1f),
+			convertColor(178f, 255f, 102f, 1f),
+			convertColor(153f, 255f, 153f, 1f),
+			convertColor(255f, 255f, 255f, 1f)
 		};
 		numberOfDegrees = colorlist.Length;
 
@@ -129,8 +128,6 @@ public class TerrainScript : MonoBehaviour {
 			}
 
 			// Reduce range of noise for each iteration
-			//rangeOfNoise = rangeOfNoise - rangeOfNoise / (float)dimension / 2;
-//			rangeOfNoise = rangeOfNoiseList[i];
 			rangeOfNoise *= 0.5f;
 		}
 		/***** Generate HeightMap *****/
@@ -150,7 +147,6 @@ public class TerrainScript : MonoBehaviour {
 		// Define the vertices. 
 		for (int i = 0; i < vertices.Length; i++) {
 			vertices [i] = new Vector3 ((float)(i % size * scale), heightMap [i / size, i % size], (float)((size - i / size) * scale));
-//			Debug.Log (heightMap [i / size, i % size]);
 		}
 		m.vertices = vertices;
 
@@ -178,6 +174,11 @@ public class TerrainScript : MonoBehaviour {
 
 		m.triangles = triangles;
 
+		// define normals
+		Vector3[] normals = new Vector3[vertices.Length];
+		for (int i = 0; i < vertices.Length; i++)
+			normals [i] = vertices [i].normalized;
+		m.normals = normals;
 		return m;
 	
 	}
@@ -221,16 +222,13 @@ public class TerrainScript : MonoBehaviour {
 		return degree;
 	}
 
-	private Color converColor(float r, float g, float b, float a){
+	private Color convertColor(float r, float g, float b, float a){
 		Color result;
 		result = new Color (r / 255.0f, g / 255.0f, b / 255.0f, a);
 		return result;
 	}
 
 	public float GetHeight(int x, int z) {
-		Debug.Log("x"+x);
-		Debug.Log("z"+z);
-			
 		return heightMap [x, z];
 	}
 }
